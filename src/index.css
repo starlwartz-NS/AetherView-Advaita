@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-deep: #050811;
+  --bg-main: #080D18;
+  --bg-surface: #0c1424;
+  --bg-card: rgba(14, 22, 38, 0.75);
+  --border-subtle: rgba(51, 71, 102, 0.45);
+  --border-glow: rgba(0, 209, 255, 0.35);
+  --cyan: #00D1FF;
+  --cyan-glow: rgba(0, 209, 255, 0.25);
+  --electric-blue: #5271FF;
+  --success: #22C98B;
+  --warning: #FFB547;
+  --critical: #FF5263;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-deep);
+  background-image: 
+    radial-gradient(1200px 700px at 50% -100px, rgba(16, 28, 54, 0.6) 0%, rgba(8, 13, 24, 0.9) 60%, #050811 100%),
+    radial-gradient(circle at 100% 100%, rgba(0, 209, 255, 0.03) 0%, transparent 40%);
+  color: #F2F6FC;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", Helvetica, Arial, sans-serif;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "JetBrains Mono", "Liberation Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Glass Card styling */
+.glass-panel {
+  background: rgba(12, 20, 36, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 71, 102, 0.45);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-panel:hover {
+  border-color: rgba(74, 105, 150, 0.6);
+}
+
+.glass-panel-active {
+  border-color: rgba(0, 209, 255, 0.45);
+  box-shadow: 0 0 20px -4px rgba(0, 209, 255, 0.15);
+}
+
+/* Custom Scrollbars */
+.custom-scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: rgba(8, 13, 24, 0.4);
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(51, 71, 102, 0.6);
+  border-radius: 9999px;
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 209, 255, 0.8);
+}
+
+.radar-grid {
+  background-image: radial-gradient(circle, rgba(0, 209, 255, 0.1) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Subtle glow animations */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(1.04); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

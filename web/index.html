@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="./aetherview-advaita-logo.png">
+  <title>AetherView Advaita | Ground Station Mission Control</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg-deep: #050811;
+      --bg-main: #080D18;
+      --cyan: #00D1FF;
+      --electric-blue: #5271FF;
+      --success: #22C98B;
+      --warning: #FFB547;
+      --critical: #FF5263;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #050811;
+      background-image: 
+        radial-gradient(1200px 700px at 50% -100px, rgba(16, 28, 54, 0.6) 0%, rgba(8, 13, 24, 0.9) 60%, #050811 100%),
+        radial-gradient(circle at 100% 100%, rgba(0, 209, 255, 0.03) 0%, transparent 40%);
+      color: #F2F6FC;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "JetBrains Mono", monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    .glass-panel {
+      background: rgba(12, 20, 36, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 71, 102, 0.45);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .glass-panel:hover {
+      border-color: rgba(74, 105, 150, 0.6);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(8, 13, 24, 0.4);
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(51, 71, 102, 0.6);
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 209, 255, 0.8);
+    }
+    .radar-grid {
+      background-image: radial-gradient(circle, rgba(0,209,255,0.1) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+  </style>
+</head>
+<body class="flex w-screen h-screen bg-transparent">
+
+  <!-- ============================================== -->
+  <!-- 1. FIXED 240px LEFT DESKTOP SIDEBAR            -->
+  <!-- ============================================== -->
+  <aside style="width: 240px; min-width: 240px; background: #080D18; border-right: 1px solid var(--border);" class="flex flex-col justify-between p-4 h-full shrink-0">
+    <div>
+      <!-- Brand Header -->
+      <div class="flex items-center space-x-3 pb-3 border-b border-[#223550]">
+        <img src="./aetherview-advaita-logo.png" alt="AetherView Advaita logo" class="w-10 h-10 rounded-full object-cover shrink-0">
+        <div>
+          <div class="font-extrabold text-[#00D1FF] text-base tracking-wider leading-none">AetherView Advaita</div>
+          <div class="text-[9px] text-gray-400 font-bold tracking-widest mt-1">MISSION CONTROL</div>
+          <div class="text-[8px] text-gray-500">ADVAITA | SEVA FIRST 2026</div>
+        </div>
+      </div>
+
+      <!-- Navigation Modules -->
+      <div class="mt-4">
+        <div class="text-[9px] mono text-gray-500 tracking-wider font-semibold mb-2 px-2">GROUND STATION MODULES</div>
+        <nav class="space-y-1">
+          <button onclick="setTab('overview')" id="nav-overview" class="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-xs font-semibold bg-[#111B2B] text-[#00D1FF] border border-[#00D1FF]/40 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            <span>Mission Overview</span>
+          </button>
+          <button onclick="setTab('telemetry')" id="nav-telemetry" class="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-xs font-medium text-gray-400 hover:text-gray-200 hover:bg-[#111B2B]/60 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+            <span>Live Telemetry</span>
+          </button>
+          <button onclick="setTab('analytics')" id="nav-analytics" class="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-xs font-medium text-gray-400 hover:text-gray-200 hover:bg-[#111B2B]/60 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            <span>Flight Analytics</span>
+          </button>
+          <button onclick="setTab('tracking')" id="nav-tracking" class="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-xs font-medium text-gray-400 hover:text-gray-200 hover:bg-[#111B2B]/60 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+            <span>Live Tracking</span>
+          </button>
+          <button onclick="setTab('comm')" id="nav-comm" class="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-xs font-medium text-gray-400 hover:text-gray-200 hover:bg-[#111B2B]/60 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071a10 10 0 0114.142 0M1.393 9.393a15 15 0 0121.214 0"></path></svg>
+            <span>Communication</span>
+          </button>
+          <button onclick="setTab('logs')" id="nav-logs" class="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-xs font-medium text-gray-400 hover:text-gray-200 hover:bg-[#111B2B]/60 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span>Mission Logs</span>
+          </button>
+          <button onclick="setTab('settings')" id="nav-settings" class="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-xs font-medium text-gray-400 hover:text-gray-200 hover:bg-[#111B2B]/60 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+            <span>System Settings</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Bottom Station Status Box -->
+    <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+      <div class="flex items-center space-x-2">
+        <span class="w-2 h-2 rounded-full bg-[#22C98B] animate-pulse"></span>
+        <span class="text-[10px] font-bold text-[#22C98B] mono">GROUND STATION: READY</span>
+      </div>
+      <div class="text-[9px] text-gray-400 mono mt-1">CALLSIGN: VU2-ADV-AETHER</div>
+      <div class="text-[9px] text-[#00D1FF] mono">RF: 433.000 MHz (SF7/BW125)</div>
+      <div class="text-[8px] text-gray-500 mono mt-1">AETHERVIEW ADVAITA (Desktop Web)</div>
+    </div>
+  </aside>
+
+  <!-- ============================================== -->
+  <!-- 2. MAIN HORIZONTAL CONTENT AREA (100% WIDTH)   -->
+  <!-- ============================================== -->
+  <main class="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+    <!-- Desktop Top Header -->
+    <header style="background: #080D18; border-bottom: 1px solid var(--border);" class="h-14 min-h-[56px] px-6 flex items-center justify-between shrink-0">
+      <!-- Title & Mission Phase -->
+      <div class="flex items-center space-x-4">
+        <div>
+          <img src="./aetherview-advaita-logo.png" alt="" aria-hidden="true" class="w-8 h-8 rounded-full object-cover inline-block align-middle mr-2">
+          <span class="font-extrabold text-[#00D1FF] text-sm tracking-wide">AetherView Advaita</span>
+          <span class="text-xs text-gray-400 font-semibold ml-1">| MISSION CONTROL</span>
+          <span class="text-xs text-gray-500 ml-2 hidden sm:inline">• TEAM ADVAITA</span>
+        </div>
+        <div class="h-4 w-px bg-[#223550]"></div>
+        <div id="header-phase" class="px-2 py-0.5 rounded text-[10px] font-bold mono bg-[#00D1FF]/10 text-[#00D1FF] border border-[#00D1FF]/40">STANDBY</div>
+        <div class="text-xs mono text-[#00D1FF] font-bold">MET: <span id="header-met">00:00</span></div>
+      </div>
+
+      <!-- Quick Metrics & Mode -->
+      <div class="flex items-center space-x-4">
+        <div class="bg-[#111B2B] px-3 py-1 rounded border border-[#223550] flex items-center space-x-4 text-xs mono">
+          <div>
+            <span class="text-[8px] text-gray-400 block">TARGET APOGEE</span>
+            <span class="text-[#00D1FF] font-bold">500.0 m</span>
+          </div>
+          <div class="h-5 w-px bg-[#223550]"></div>
+          <div>
+            <span class="text-[8px] text-gray-400 block">ALTITUDE AGL</span>
+            <span id="header-alt" class="text-gray-100 font-bold">0.0 m</span>
+          </div>
+        </div>
+
+        <div id="header-mode" class="px-2.5 py-1 rounded border border-[#FFB547]/50 bg-[#FFB547]/10 text-[#FFB547] text-[10px] mono font-bold flex items-center space-x-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#FFB547]"></span>
+          <span>SIMULATION MODE</span>
+        </div>
+
+        <!-- Clocks -->
+        <div class="bg-[#111B2B] px-3 py-1 rounded border border-[#223550] text-right mono hidden md:block">
+          <div id="header-clock-utc" class="text-xs text-[#00D1FF] font-bold">00:00:00 UTC</div>
+          <div id="header-clock-loc" class="text-[8px] text-gray-500">LOC: 00:00:00</div>
+        </div>
+
+        <!-- Controls Toolbar -->
+        <div class="flex items-center space-x-2">
+          <button id="btn-start" onclick="toggleSim()" class="px-3 py-1.5 rounded bg-[#00D1FF] hover:bg-[#00D1FF]/90 text-[#080D18] text-xs font-bold transition flex items-center space-x-1 shadow-[0_0_10px_rgba(0,209,255,0.3)]">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+            <span id="btn-start-label">START DEMO</span>
+          </button>
+          <button onclick="resetSim()" class="px-2.5 py-1.5 rounded border border-[#223550] hover:border-gray-500 text-gray-400 hover:text-gray-200 text-xs font-bold transition">
+            RESET
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Scrollable Multi-Column Desktop Dashboard Content -->
+    <div class="flex-1 p-4 overflow-y-auto custom-scroll" id="tab-content">
+      <!-- Dynamically filled by JS -->
+    </div>
+  </main>
+
+  <script>
+    // State
+    let currentTab = 'overview';
+    let isRunning = false;
+    let isPaused = false;
+    let met = 0;
+    let packetId = 0;
+    let simInterval = null;
+    let timeHorizon = '60s';
+
+    let telemetry = {
+      phase: 'STANDBY',
+      alt: 0.0,
+      vel: 0.0,
+      temp: 28.5,
+      pressure: 1013.25,
+      humidity: 58.0,
+      aqi: 42,
+      batt: 8.38,
+      lat: 13.0827,
+      lon: 80.2707,
+      sats: 10,
+      rssi: -62,
+      snr: 9.8,
+      packetsRx: 0,
+      packetsLost: 0,
+      apogee: 500.0,
+      maxDescentVel: 0.0
+    };
+
+    let history = [];
+    let events = [
+      { time: '00:00:00', phase: 'STANDBY', msg: 'AetherView Advaita ground station initialized. Radio link ready on 433 MHz.' }
+    ];
+
+    let radarAngle = 0;
+    let radarCanvas = null;
+
+    // Clock update
+    setInterval(() => {
+      const d = new Date();
+      const utcStr = d.toUTCString().split(' ')[4] + ' UTC';
+      const locStr = 'LOC: ' + d.toLocaleTimeString();
+      const elUtc = document.getElementById('header-clock-utc');
+      const elLoc = document.getElementById('header-clock-loc');
+      if (elUtc) elUtc.innerText = utcStr;
+      if (elLoc) elLoc.innerText = locStr;
+    }, 1000);
+
+    function setTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('nav button').forEach(b => {
+        b.className = 'w-full flex items-center space-x-3 px-3 py-2 rounded-md text-xs font-medium text-gray-400 hover:text-gray-200 hover:bg-[#111B2B]/60 transition';
+      });
+      const activeBtn = document.getElementById('nav-' + tab);
+      if (activeBtn) {
+        activeBtn.className = 'w-full flex items-center space-x-3 px-3 py-2 rounded-md text-xs font-semibold bg-[#111B2B] text-[#00D1FF] border border-[#00D1FF]/40 transition';
+      }
+      render();
+    }
+
+    function toggleSim() {
+      if (!isRunning) {
+        isRunning = true;
+        isPaused = false;
+        document.getElementById('btn-start-label').innerText = 'PAUSE';
+        startSimulationLoop();
+      } else if (!isPaused) {
+        isPaused = true;
+        document.getElementById('btn-start-label').innerText = 'RESUME';
+      } else {
+        isPaused = false;
+        document.getElementById('btn-start-label').innerText = 'PAUSE';
+      }
+      render();
+    }
+
+    function resetSim() {
+      isRunning = false;
+      isPaused = false;
+      clearInterval(simInterval);
+      met = 0;
+      telemetry.phase = 'STANDBY';
+      telemetry.alt = 0.0;
+      telemetry.vel = 0.0;
+      telemetry.temp = 28.5;
+      telemetry.pressure = 1013.25;
+      telemetry.humidity = 58.0;
+      telemetry.aqi = 42;
+      telemetry.batt = 8.38;
+      telemetry.packetsRx = 0;
+      telemetry.packetsLost = 0;
+      telemetry.maxDescentVel = 0.0;
+      history = [];
+      events = [{ time: '00:00:00', phase: 'STANDBY', msg: 'Mission reset. System in STANDBY.' }];
+      document.getElementById('btn-start-label').innerText = 'START DEMO';
+      document.getElementById('header-met').innerText = '00:00';
+      document.getElementById('header-phase').innerText = 'STANDBY';
+      document.getElementById('header-alt').innerText = '0.0 m';
+      render();
+    }
+
+    function startSimulationLoop() {
+      clearInterval(simInterval);
+      simInterval = setInterval(() => {
+        if (!isRunning || isPaused) return;
+
+        met += 0.5;
+        packetId++;
+        telemetry.packetsRx++;
+
+        const mins = Math.floor(met / 60).toString().padStart(2, '0');
+        const secs = Math.floor(met % 60).toString().padStart(2, '0');
+        const timeStr = `${mins}:${secs}`;
+        document.getElementById('header-met').innerText = timeStr;
+
+        if (met < 3) {
+          telemetry.phase = 'STANDBY';
+          telemetry.alt = 0.0;
+          telemetry.vel = 0.0;
+        } else if (met < 6) {
+          if (telemetry.phase !== 'ARMED') {
+            telemetry.phase = 'ARMED';
+            events.unshift({ time: timeStr, phase: 'ARMED', msg: 'Flight computer armed. Accelerometer & barometer calibrated.' });
+          }
+        } else if (met < 8) {
+          if (telemetry.phase !== 'DEPLOYED') {
+            telemetry.phase = 'DEPLOYED';
+            telemetry.alt = 500.0;
+            telemetry.vel = -2.5;
+            events.unshift({ time: timeStr, phase: 'DEPLOYED', msg: 'Deployment detected! Ejection at 500.0m AGL.' });
+          }
+        } else {
+          if (telemetry.alt > 2.0) {
+            if (telemetry.phase !== 'DESCENT') {
+              telemetry.phase = 'DESCENT';
+              events.unshift({ time: timeStr, phase: 'DESCENT', msg: 'Parachute deployed. Controlled aerodynamic descent nominal.' });
+            }
+            const gust = (Math.random() - 0.5) * 0.4;
+            telemetry.vel = -(6.4 + gust);
+            if (Math.abs(telemetry.vel) > telemetry.maxDescentVel) {
+              telemetry.maxDescentVel = Math.abs(telemetry.vel);
+            }
+            telemetry.alt = Math.max(0.0, telemetry.alt + (telemetry.vel * 0.5));
+            telemetry.temp = 28.5 - (0.0065 * telemetry.alt) + ((Math.random() - 0.5) * 0.2);
+            telemetry.pressure = 1013.25 * Math.exp((-0.02896 * 9.8 * telemetry.alt) / (8.314 * (273.15 + telemetry.temp)));
+            telemetry.humidity = 58.0 + (telemetry.alt * 0.02);
+            telemetry.aqi = Math.max(25, Math.floor(54 - (telemetry.alt * 0.04)));
+            telemetry.batt = Math.max(7.9, telemetry.batt - 0.0002);
+            telemetry.rssi = Math.floor(-48 - (15 * Math.log10(Math.sqrt(telemetry.alt * telemetry.alt + 2500) / 10)));
+            telemetry.lat += (Math.random() - 0.48) * 0.00005;
+            telemetry.lon += (Math.random() - 0.48) * 0.00005;
+          } else {
+            if (telemetry.phase !== 'LANDING' && telemetry.phase !== 'RECOVERY') {
+              telemetry.phase = 'LANDING';
+              telemetry.alt = 0.2;
+              telemetry.vel = 0.0;
+              events.unshift({ time: timeStr, phase: 'LANDING', msg: 'Touchdown confirmed! Impact shock absorbed safely.' });
+            } else if (met > 95 && telemetry.phase !== 'RECOVERY') {
+              telemetry.phase = 'RECOVERY';
+              events.unshift({ time: timeStr, phase: 'RECOVERY', msg: 'Recovery beacon active: Audio buzzer & GPS coordinate ping.' });
+            }
+          }
+        }
+
+        const point = {
+          time: timeStr,
+          met: met,
+          packetId: packetId,
+          phase: telemetry.phase,
+          alt: telemetry.alt,
+          vel: telemetry.vel,
+          temp: telemetry.temp,
+          pressure: telemetry.pressure,
+          humidity: telemetry.humidity,
+          aqi: telemetry.aqi,
+          batt: telemetry.batt,
+          rssi: telemetry.rssi,
+          snr: telemetry.snr
+        };
+        history.push(point);
+        if (history.length > 200) history.shift();
+
+        document.getElementById('header-phase').innerText = telemetry.phase;
+        document.getElementById('header-alt').innerText = telemetry.alt.toFixed(1) + ' m';
+
+        render();
+      }, 500);
+    }
+
+    // Main Render Switch
+    function render() {
+      const container = document.getElementById('tab-content');
+      if (!container) return;
+
+      switch(currentTab) {
+        case 'overview':
+          renderOverview(container);
+          break;
+        case 'telemetry':
+          renderTelemetry(container);
+          break;
+        case 'analytics':
+          renderAnalytics(container);
+          break;
+        case 'tracking':
+          renderTracking(container);
+          break;
+        case 'comm':
+          renderComm(container);
+          break;
+        case 'logs':
+          renderLogs(container);
+          break;
+        case 'settings':
+          renderSettings(container);
+          break;
+        default:
+          renderOverview(container);
+      }
+    }
+
+    // 1. OVERVIEW
+    function renderOverview(container) {
+      container.innerHTML = `
+        <!-- ROW 1: 5 LARGE KPI CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          <!-- Altitude -->
+          <div class="bg-[#111B2B] p-3.5 rounded-lg card-border">
+            <div class="flex justify-between items-center text-[10px] text-gray-400 font-bold">
+              <span>ALTITUDE AGL</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-[#22C98B]"></span>
+            </div>
+            <div class="text-[9px] text-gray-500 mono">BMP280 Barometer</div>
+            <div class="mt-1 flex items-baseline space-x-1">
+              <span class="text-2xl font-bold mono text-[#00D1FF]">${telemetry.alt.toFixed(1)}</span>
+              <span class="text-xs text-gray-400 mono">m</span>
+            </div>
+            <div class="text-[9px] text-gray-500 mono flex justify-between mt-0.5">
+              <span>≈ ${(telemetry.alt * 3.28).toFixed(0)} ft MSL</span>
+              <span class="${telemetry.vel < -0.1 ? 'text-[#00D1FF]' : 'text-gray-400'}">${telemetry.vel.toFixed(1)} m/s</span>
+            </div>
+          </div>
+
+          <!-- Temperature -->
+          <div class="bg-[#111B2B] p-3.5 rounded-lg card-border">
+            <div class="flex justify-between items-center text-[10px] text-gray-400 font-bold">
+              <span>TEMPERATURE</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-[#22C98B]"></span>
+            </div>
+            <div class="text-[9px] text-gray-500 mono">BME680 Sensor</div>
+            <div class="mt-1 flex items-baseline space-x-1">
+              <span class="text-2xl font-bold mono text-[#FF7E47]">${telemetry.temp.toFixed(1)}</span>
+              <span class="text-xs text-gray-400 mono">°C</span>
+            </div>
+            <div class="text-[9px] text-gray-500 mono mt-0.5">Lapse: -6.5 °C/km (ISA)</div>
+          </div>
+
+          <!-- Pressure -->
+          <div class="bg-[#111B2B] p-3.5 rounded-lg card-border">
+            <div class="flex justify-between items-center text-[10px] text-gray-400 font-bold">
+              <span>PRESSURE</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-[#22C98B]"></span>
+            </div>
+            <div class="text-[9px] text-gray-500 mono">BMP280 Barometer</div>
+            <div class="mt-1 flex items-baseline space-x-1">
+              <span class="text-2xl font-bold mono text-[#B57AFF]">${telemetry.pressure.toFixed(1)}</span>
+              <span class="text-xs text-gray-400 mono">hPa</span>
+            </div>
+            <div class="text-[9px] text-gray-500 mono mt-0.5">Sea Level: 1013.25 hPa</div>
+          </div>
+
+          <!-- AQI -->
+          <div class="bg-[#111B2B] p-3.5 rounded-lg card-border">
+            <div class="flex justify-between items-center text-[10px] text-gray-400 font-bold">
+              <span>AIR QUALITY (AQI)</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-[#22C98B]"></span>
+            </div>
+            <div class="text-[9px] text-gray-500 mono">PMS5003 Laser</div>
+            <div class="mt-1 flex items-baseline space-x-1">
+              <span class="text-2xl font-bold mono text-[#FFC837]">${telemetry.aqi}</span>
+              <span class="text-xs text-gray-400 mono">${telemetry.aqi <= 50 ? 'Good' : 'Moderate'}</span>
+            </div>
+            <div class="text-[9px] text-gray-500 mono mt-0.5">PM2.5 / PM10 Active</div>
+          </div>
+
+          <!-- Battery -->
+          <div class="bg-[#111B2B] p-3.5 rounded-lg card-border">
+            <div class="flex justify-between items-center text-[10px] text-gray-400 font-bold">
+              <span>BATTERY VOLTAGE</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-[#22C98B]"></span>
+            </div>
+            <div class="text-[9px] text-gray-500 mono">LiPo 2S Cell (8.4V max)</div>
+            <div class="mt-1 flex items-baseline space-x-1">
+              <span class="text-2xl font-bold mono text-[#22C98B]">${telemetry.batt.toFixed(2)}</span>
+              <span class="text-xs text-gray-400 mono">V</span>
+            </div>
+            <div class="text-[9px] text-gray-500 mono mt-0.5">Health: 98% (Optimal)</div>
+          </div>
+        </div>
+
+        <!-- ROW 2: DESCENT LADDER, ATMOSPHERE, SYSTEM HEALTH -->
+        <div class="grid grid-cols-12 gap-3 mt-3">
+          <!-- Descent Visualizer -->
+          <div class="col-span-12 lg:col-span-5 bg-[#111B2B] p-4 rounded-lg card-border flex flex-col justify-between">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-gray-300">FLIGHT STATUS & DESCENT LADDER</span>
+              <span class="text-[10px] mono px-2 py-0.5 rounded bg-[#00D1FF]/10 text-[#00D1FF] border border-[#00D1FF]/30 font-bold">${telemetry.phase}</span>
+            </div>
+            <div class="flex items-center space-x-6 my-2">
+              <div class="relative w-12 h-44 bg-[#080D18] rounded border border-[#223550] flex flex-col justify-between py-2 px-1">
+                <div class="text-[8px] mono text-[#00D1FF] text-right font-bold">500m</div>
+                <div class="text-[8px] mono text-gray-500 text-right">375m</div>
+                <div class="text-[8px] mono text-gray-500 text-right">250m</div>
+                <div class="text-[8px] mono text-gray-500 text-right">125m</div>
+                <div class="text-[8px] mono text-[#22C98B] text-right font-bold">0m</div>
+                <div style="bottom: ${Math.min(92, Math.max(4, (telemetry.alt / 500) * 100))}%;" class="absolute left-0 right-0 h-2 bg-[#00D1FF] shadow-lg shadow-[#00D1FF]/50 rounded flex items-center justify-center transition-all duration-300">
+                  <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                </div>
+              </div>
+              <div class="flex-1 space-y-3">
+                <div>
+                  <div class="text-[10px] text-gray-400 mono">CURRENT APOGEE POSITION</div>
+                  <div class="text-3xl font-extrabold mono text-[#00D1FF]">${telemetry.alt.toFixed(1)} <span class="text-sm text-gray-400">m AGL</span></div>
+                </div>
+                <div>
+                  <div class="text-[10px] text-gray-400 mono">VERTICAL DESCENT VELOCITY</div>
+                  <div class="text-xl font-bold mono text-[#5271FF]">${Math.abs(telemetry.vel).toFixed(2)} m/s</div>
+                </div>
+                <div class="bg-[#080D18] p-2 rounded border border-[#223550] flex justify-between text-[10px] mono">
+                  <div><span class="text-gray-500">TARGET:</span> 500.0m</div>
+                  <div><span class="text-gray-500">PARACHUTE:</span> ${Math.abs(telemetry.vel) > 0.5 ? 'NOMINAL' : 'PAD'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Atmospheric Conditions -->
+          <div class="col-span-12 lg:col-span-4 bg-[#111B2B] p-4 rounded-lg card-border space-y-2">
+            <div class="text-xs font-bold text-gray-300 flex justify-between">
+              <span>ATMOSPHERIC CONDITIONS</span>
+              <span class="text-[9px] text-gray-500 mono">BME680 Sensor</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="bg-[#080D18] p-2 rounded border border-[#223550]">
+                <div class="text-[8px] text-gray-400">AIR DENSITY (ρ)</div>
+                <div class="font-bold mono text-[#00D1FF]">1.192 kg/m³</div>
+              </div>
+              <div class="bg-[#080D18] p-2 rounded border border-[#223550]">
+                <div class="text-[8px] text-gray-400">HUMIDITY</div>
+                <div class="font-bold mono text-[#38E1FF]">${telemetry.humidity.toFixed(1)} %</div>
+              </div>
+              <div class="bg-[#080D18] p-2 rounded border border-[#223550]">
+                <div class="text-[8px] text-gray-400">TEMP LAPSE</div>
+                <div class="font-bold mono text-[#FF7E47]">-6.5 °C/km</div>
+              </div>
+              <div class="bg-[#080D18] p-2 rounded border border-[#223550]">
+                <div class="text-[8px] text-gray-400">AIR QUALITY</div>
+                <div class="font-bold mono text-[#FFC837]">${telemetry.aqi} AQI</div>
+              </div>
+            </div>
+            <div class="bg-[#080D18] p-2 rounded border border-[#223550] text-[10px] mono text-gray-400 flex justify-between">
+              <span>Pressure Altitude:</span>
+              <span class="text-[#00D1FF] font-bold">${telemetry.alt.toFixed(1)} m</span>
+            </div>
+          </div>
+
+          <!-- Subsystem Health -->
+          <div class="col-span-12 lg:col-span-3 bg-[#111B2B] p-4 rounded-lg card-border space-y-2">
+            <div class="text-xs font-bold text-gray-300 flex justify-between">
+              <span>SUBSYSTEM HEALTH</span>
+              <span class="text-[9px] text-[#22C98B] mono">ALL NOMINAL</span>
+            </div>
+            <div class="space-y-1.5 text-[10px] mono">
+              <div class="bg-[#080D18] p-1.5 px-2 rounded border border-[#223550] flex justify-between">
+                <span class="text-gray-400">ESP32 MCU:</span> <span class="text-[#22C98B] font-bold">240 MHz OK</span>
+              </div>
+              <div class="bg-[#080D18] p-1.5 px-2 rounded border border-[#223550] flex justify-between">
+                <span class="text-gray-400">SX1278 LoRa:</span> <span class="text-[#22C98B] font-bold">433 MHz TX</span>
+              </div>
+              <div class="bg-[#080D18] p-1.5 px-2 rounded border border-[#223550] flex justify-between">
+                <span class="text-gray-400">NEO-6M GPS:</span> <span class="text-[#00D1FF] font-bold">3D LOCK (10 SAT)</span>
+              </div>
+              <div class="bg-[#080D18] p-1.5 px-2 rounded border border-[#223550] flex justify-between">
+                <span class="text-gray-400">POWER 2S:</span> <span class="text-[#22C98B] font-bold">${telemetry.batt.toFixed(2)}V OK</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 3: DESKTOP CHARTS (ALTITUDE, TEMP/PRESSURE, AQI/HUMIDITY) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-3">
+          <!-- Chart 1: Altitude -->
+          <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+            <div class="flex justify-between items-center text-xs font-bold text-gray-300 mb-2">
+              <span>ALTITUDE PROFILE (m)</span>
+              <span class="text-[10px] mono text-[#00D1FF]">TARGET: 500m</span>
+            </div>
+            <canvas id="overview-chart-alt" class="w-full h-36 bg-[#080D18] rounded border border-[#223550]"></canvas>
+          </div>
+
+          <!-- Chart 2: Temp & Pressure -->
+          <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+            <div class="flex justify-between items-center text-xs font-bold text-gray-300 mb-2">
+              <span>ATMOSPHERIC PROFILE</span>
+              <span class="text-[10px] mono text-[#FF7E47]">${telemetry.temp.toFixed(1)}°C | ${telemetry.pressure.toFixed(0)}hPa</span>
+            </div>
+            <canvas id="overview-chart-temp" class="w-full h-36 bg-[#080D18] rounded border border-[#223550]"></canvas>
+          </div>
+
+          <!-- Chart 3: AQI & Humidity -->
+          <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+            <div class="flex justify-between items-center text-xs font-bold text-gray-300 mb-2">
+              <span>AQI & HUMIDITY</span>
+              <span class="text-[10px] mono text-[#FFC837]">AQI: ${telemetry.aqi} | ${telemetry.humidity.toFixed(0)}%</span>
+            </div>
+            <canvas id="overview-chart-aqi" class="w-full h-36 bg-[#080D18] rounded border border-[#223550]"></canvas>
+          </div>
+        </div>
+
+        <!-- ROW 4: RECENT EVENTS, LORA STATS, PACKET STREAM -->
+        <div class="grid grid-cols-12 gap-3 mt-3">
+          <!-- Events -->
+          <div class="col-span-12 lg:col-span-4 bg-[#111B2B] p-3.5 rounded-lg card-border flex flex-col h-48">
+            <div class="text-xs font-bold text-gray-300 mb-2 flex justify-between">
+              <span>RECENT MISSION EVENTS</span>
+              <span class="text-[9px] mono text-gray-500">${events.length} logged</span>
+            </div>
+            <div class="flex-1 overflow-y-auto custom-scroll space-y-1.5 pr-1">
+              ${events.map(e => `
+                <div class="bg-[#080D18] p-1.5 rounded border border-[#223550] text-[10px] mono">
+                  <div class="flex justify-between text-gray-500 text-[8px]">
+                    <span>${e.time}</span>
+                    <span class="text-[#00D1FF] font-bold">${e.phase}</span>
+                  </div>
+                  <div class="text-gray-300 mt-0.5">${e.msg}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- LoRa Comms -->
+          <div class="col-span-12 lg:col-span-4 bg-[#111B2B] p-3.5 rounded-lg card-border flex flex-col justify-between h-48">
+            <div class="text-xs font-bold text-gray-300 flex justify-between">
+              <span>LORA RF LINK STATISTICS</span>
+              <span class="text-[9px] mono text-[#22C98B]">LINK LOCKED</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs mono">
+              <div class="bg-[#080D18] p-2 rounded border border-[#223550]">
+                <div class="text-[8px] text-gray-400">SIGNAL RSSI</div>
+                <div class="text-base font-bold text-[#00D1FF]">${telemetry.rssi} dBm</div>
+              </div>
+              <div class="bg-[#080D18] p-2 rounded border border-[#223550]">
+                <div class="text-[8px] text-gray-400">SNR RATIO</div>
+                <div class="text-base font-bold text-[#22C98B]">+${telemetry.snr} dB</div>
+              </div>
+              <div class="bg-[#080D18] p-2 rounded border border-[#223550]">
+                <div class="text-[8px] text-gray-400">PACKETS RX</div>
+                <div class="text-base font-bold text-gray-200">${telemetry.packetsRx}</div>
+              </div>
+              <div class="bg-[#080D18] p-2 rounded border border-[#223550]">
+                <div class="text-[8px] text-gray-400">PRR SUCCESS</div>
+                <div class="text-base font-bold text-[#22C98B]">99.4 %</div>
+              </div>
+            </div>
+            <div class="text-[8px] mono text-gray-500">MODULATION: 433.000 MHz • SF7 • BW 125 kHz • CR 4/5</div>
+          </div>
+
+          <!-- Latest Packet Stream -->
+          <div class="col-span-12 lg:col-span-4 bg-[#111B2B] p-3.5 rounded-lg card-border flex flex-col h-48">
+            <div class="text-xs font-bold text-gray-300 mb-2 flex justify-between">
+              <span>LIVE PACKET STREAM</span>
+              <span class="text-[9px] mono text-[#00D1FF]">PKT #${packetId}</span>
+            </div>
+            <div class="bg-[#080D18] p-2 rounded border border-[#223550] flex-1 overflow-y-auto custom-scroll mono text-[9px] text-gray-400 space-y-1">
+              <div><span class="text-[#00D1FF]">ID:</span> AETHER-CAN-01 | <span class="text-[#22C98B]">PHASE:</span> ${telemetry.phase}</div>
+              <div><span class="text-gray-500">ALT:</span> ${telemetry.alt.toFixed(1)}m | <span class="text-gray-500">VEL:</span> ${telemetry.vel.toFixed(1)}m/s</div>
+              <div><span class="text-gray-500">TEMP:</span> ${telemetry.temp.toFixed(1)}°C | <span class="text-gray-500">PRESS:</span> ${telemetry.pressure.toFixed(1)}hPa</div>
+              <div><span class="text-gray-500">AQI:</span> ${telemetry.aqi} | <span class="text-gray-500">HUM:</span> ${telemetry.humidity.toFixed(1)}%</div>
+              <div><span class="text-gray-500">GPS:</span> ${telemetry.lat.toFixed(4)}°N, ${telemetry.lon.toFixed(4)}°E (10 SAT)</div>
+              <div><span class="text-gray-500">BATT:</span> ${telemetry.batt.toFixed(2)}V | <span class="text-gray-500">RSSI:</span> ${telemetry.rssi}dBm</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      drawOverviewCharts();
+    }
+
+    function drawOverviewCharts() {
+      drawCanvasChart('overview-chart-alt', history.map(h => h.alt), 0, 520, '#00D1FF', 'm');
+      drawCanvasChart('overview-chart-temp', history.map(h => h.temp), 15, 35, '#FF7E47', '°C');
+      drawCanvasChart('overview-chart-aqi', history.map(h => h.aqi), 20, 100, '#FFC837', 'AQI');
+    }
+
+    function drawCanvasChart(canvasId, dataPoints, minVal, maxVal, colorHex, unit) {
+      const cvs = document.getElementById(canvasId);
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.clientWidth;
+      const h = cvs.clientHeight;
+      cvs.width = w;
+      cvs.height = h;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Grid
+      ctx.strokeStyle = '#223550';
+      ctx.lineWidth = 0.5;
+      for (let y = 10; y < h; y += 25) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      if (dataPoints.length < 2) return;
+
+      const step = w / Math.max(20, dataPoints.length - 1);
+      ctx.beginPath();
+      for (let i = 0; i < dataPoints.length; i++) {
+        const val = dataPoints[i];
+        const normalized = Math.max(0, Math.min(1, (val - minVal) / (maxVal - minVal)));
+        const x = i * step;
+        const y = h - (normalized * (h - 20)) - 10;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+
+      ctx.strokeStyle = colorHex;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Current value readout
+      ctx.fillStyle = colorHex;
+      ctx.font = '10px monospace';
+      const lastVal = dataPoints[dataPoints.length - 1];
+      ctx.fillText(lastVal.toFixed(1) + ' ' + unit, w - 55, 14);
+    }
+
+    // 2. LIVE TELEMETRY
+    function renderTelemetry(container) {
+      container.innerHTML = `
+        <div class="flex justify-between items-center mb-3">
+          <div>
+            <h2 class="text-sm font-bold text-gray-200">LIVE TELEMETRY WAVEFORM ANALYSIS</h2>
+            <div class="text-[10px] text-gray-400 mono">Synchronized multi-channel telemetry streams (500ms epoch)</div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-[10px] mono text-gray-400">WINDOW:</span>
+            <button onclick="timeHorizon='30s'; render();" class="px-2 py-1 text-[10px] mono rounded border ${timeHorizon==='30s'?'bg-[#00D1FF] text-black font-bold border-[#00D1FF]':'border-[#223550] text-gray-400'}">30s</button>
+            <button onclick="timeHorizon='60s'; render();" class="px-2 py-1 text-[10px] mono rounded border ${timeHorizon==='60s'?'bg-[#00D1FF] text-black font-bold border-[#00D1FF]':'border-[#223550] text-gray-400'}">60s</button>
+            <button onclick="timeHorizon='180s'; render();" class="px-2 py-1 text-[10px] mono rounded border ${timeHorizon==='180s'?'bg-[#00D1FF] text-black font-bold border-[#00D1FF]':'border-[#223550] text-gray-400'}">180s</button>
+            <button onclick="timeHorizon='ALL'; render();" class="px-2 py-1 text-[10px] mono rounded border ${timeHorizon==='ALL'?'bg-[#00D1FF] text-black font-bold border-[#00D1FF]':'border-[#223550] text-gray-400'}">ALL</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+            <div class="flex justify-between text-xs font-bold text-gray-300 mb-1">
+              <span>ALTITUDE AGL (m)</span>
+              <span class="text-[#00D1FF] mono">${telemetry.alt.toFixed(1)} m</span>
+            </div>
+            <canvas id="chart-alt" class="w-full h-44 bg-[#080D18] rounded border border-[#223550]"></canvas>
+          </div>
+
+          <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+            <div class="flex justify-between text-xs font-bold text-gray-300 mb-1">
+              <span>VERTICAL VELOCITY (m/s)</span>
+              <span class="text-[#5271FF] mono">${telemetry.vel.toFixed(1)} m/s</span>
+            </div>
+            <canvas id="chart-vel" class="w-full h-44 bg-[#080D18] rounded border border-[#223550]"></canvas>
+          </div>
+
+          <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+            <div class="flex justify-between text-xs font-bold text-gray-300 mb-1">
+              <span>AMBIENT TEMPERATURE (°C)</span>
+              <span class="text-[#FF7E47] mono">${telemetry.temp.toFixed(1)} °C</span>
+            </div>
+            <canvas id="chart-temp" class="w-full h-44 bg-[#080D18] rounded border border-[#223550]"></canvas>
+          </div>
+
+          <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+            <div class="flex justify-between text-xs font-bold text-gray-300 mb-1">
+              <span>BAROMETRIC PRESSURE (hPa)</span>
+              <span class="text-[#B57AFF] mono">${telemetry.pressure.toFixed(1)} hPa</span>
+            </div>
+            <canvas id="chart-press" class="w-full h-44 bg-[#080D18] rounded border border-[#223550]"></canvas>
+          </div>
+
+          <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+            <div class="flex justify-between text-xs font-bold text-gray-300 mb-1">
+              <span>AIR QUALITY INDEX (AQI)</span>
+              <span class="text-[#FFC837] mono">${telemetry.aqi} AQI</span>
+            </div>
+            <canvas id="chart-aqi" class="w-full h-44 bg-[#080D18] rounded border border-[#223550]"></canvas>
+          </div>
+
+          <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+            <div class="flex justify-between text-xs font-bold text-gray-300 mb-1">
+              <span>LORA RF SIGNAL RSSI (dBm)</span>
+              <span class="text-[#22C98B] mono">${telemetry.rssi} dBm</span>
+            </div>
+            <canvas id="chart-rssi" class="w-full h-44 bg-[#080D18] rounded border border-[#223550]"></canvas>
+          </div>
+        </div>
+      `;
+
+      drawCanvasChart('chart-alt', history.map(h => h.alt), 0, 520, '#00D1FF', 'm');
+      drawCanvasChart('chart-vel', history.map(h => h.vel), -12, 4, '#5271FF', 'm/s');
+      drawCanvasChart('chart-temp', history.map(h => h.temp), 15, 35, '#FF7E47', '°C');
+      drawCanvasChart('chart-press', history.map(h => h.pressure), 950, 1025, '#B57AFF', 'hPa');
+      drawCanvasChart('chart-aqi', history.map(h => h.aqi), 20, 100, '#FFC837', 'AQI');
+      drawCanvasChart('chart-rssi', history.map(h => h.rssi), -110, -40, '#22C98B', 'dBm');
+    }
+
+    // 3. FLIGHT ANALYTICS
+    function renderAnalytics(container) {
+      container.innerHTML = `
+        <div class="grid grid-cols-4 gap-3 mb-3">
+          <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+            <div class="text-[9px] text-gray-400 mono">APOGEE REACHED</div>
+            <div class="text-2xl font-bold mono text-[#00D1FF]">${telemetry.apogee.toFixed(1)} m</div>
+            <div class="text-[8px] text-gray-500 mono">Target: 500.0m (100% Achieved)</div>
+          </div>
+          <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+            <div class="text-[9px] text-gray-400 mono">MAX DESCENT SPEED</div>
+            <div class="text-2xl font-bold mono text-[#FF7E47]">${telemetry.maxDescentVel.toFixed(2)} m/s</div>
+            <div class="text-[8px] text-gray-500 mono">Design limit: 10.0 m/s</div>
+          </div>
+          <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+            <div class="text-[9px] text-gray-400 mono">AVG DESCENT RATE</div>
+            <div class="text-2xl font-bold mono text-[#5271FF]">6.40 m/s</div>
+            <div class="text-[8px] text-gray-500 mono">Aerodynamic parachute drag</div>
+          </div>
+          <div class="bg-[#111B2B] p-3 rounded-lg card-border">
+            <div class="text-[9px] text-gray-400 mono">TOTAL MISSION ELAPSED</div>
+            <div class="text-2xl font-bold mono text-[#22C98B]">${Math.floor(met/60)}m ${Math.floor(met%60)}s</div>
+            <div class="text-[8px] text-gray-500 mono">Touchdown target: ~78 sec</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div class="bg-[#111B2B] p-4 rounded-lg card-border">
+            <h3 class="text-xs font-bold text-gray-300 mb-2">DESCENT TRAJECTORY PROFILE (ALTITUDE vs TIME)</h3>
+            <canvas id="analytics-traj" class="w-full h-64 bg-[#080D18] rounded border border-[#223550]"></canvas>
+          </div>
+
+          <div class="bg-[#111B2B] p-4 rounded-lg card-border flex flex-col justify-between">
+            <div>
+              <h3 class="text-xs font-bold text-gray-300 mb-2">ATMOSPHERIC SOUNDING CORRELATION</h3>
+              <div class="space-y-2 text-xs mono">
+                <div class="bg-[#080D18] p-2.5 rounded border border-[#223550] flex justify-between">
+                  <span class="text-gray-400">Atmospheric Lapse Rate:</span>
+                  <span class="text-[#00D1FF] font-bold">-6.5 °C per 1,000m (Standard ISA)</span>
+                </div>
+                <div class="bg-[#080D18] p-2.5 rounded border border-[#223550] flex justify-between">
+                  <span class="text-gray-400">Surface Air Density:</span>
+                  <span class="text-[#22C98B] font-bold">1.225 kg/m³ @ 1013.25 hPa</span>
+                </div>
+                <div class="bg-[#080D18] p-2.5 rounded border border-[#223550] flex justify-between">
+                  <span class="text-gray-400">Apogee Air Density:</span>
+                  <span class="text-[#00D1FF] font-bold">1.167 kg/m³ @ 954.2 hPa</span>
+                </div>
+                <div class="bg-[#080D18] p-2.5 rounded border border-[#223550] flex justify-between">
+                  <span class="text-gray-400">Parachute Drag Coefficient (Cd):</span>
+                  <span class="text-gray-200 font-bold">1.50 (Cross-type Canopy)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-[#080D18] p-3 rounded border border-[#223550] text-[10px] mono text-gray-400 mt-3">
+              <span class="text-[#22C98B] font-bold">RECOVERY SAFETY MARGIN:</span> Parachute terminal velocity conforms to SEVA FIRST safety guidelines (under 8.0 m/s for soft ground impact).
+            </div>
+          </div>
+        </div>
+      `;
+
+      drawCanvasChart('analytics-traj', history.map(h => h.alt), 0, 520, '#00D1FF', 'm');
+    }
+
+    // 4. LIVE TRACKING
+    function renderTracking(container) {
+      container.innerHTML = `
+        <div class="grid grid-cols-12 gap-3 h-full">
+          <!-- Tactical Radar Scope (Left) -->
+          <div class="col-span-12 lg:col-span-7 bg-[#111B2B] p-4 rounded-lg card-border flex flex-col items-center justify-between">
+            <div class="w-full flex justify-between items-center mb-2">
+              <span class="text-xs font-bold text-gray-300">TACTICAL POSITION RADAR SCOPE</span>
+              <span class="text-[9px] mono px-2 py-0.5 rounded bg-[#00D1FF]/10 text-[#00D1FF] border border-[#00D1FF]/30 font-bold">RANGE: 500m</span>
+            </div>
+            <div class="relative w-80 h-80 rounded-full border border-[#00D1FF]/40 bg-[#080D18] flex items-center justify-center overflow-hidden radar-grid">
+              <canvas id="radar-canvas" width="320" height="320" class="absolute inset-0"></canvas>
+              <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="w-60 h-60 rounded-full border border-[#00D1FF]/20"></div>
+                <div class="w-40 h-40 rounded-full border border-[#00D1FF]/20 absolute"></div>
+                <div class="w-20 h-20 rounded-full border border-[#00D1FF]/20 absolute"></div>
+                <div class="w-full h-px bg-[#00D1FF]/20 absolute"></div>
+                <div class="h-full w-px bg-[#00D1FF]/20 absolute"></div>
+              </div>
+            </div>
+            <div class="w-full flex justify-between text-[10px] mono text-gray-400 mt-2">
+              <span>GROUND STATION: [0, 0]</span>
+              <span class="text-[#00D1FF]">AZ: 042° | EL: 74°</span>
+              <span>SLANT: ${(Math.sqrt(telemetry.alt*telemetry.alt + 2500)).toFixed(1)} m</span>
+            </div>
+          </div>
+
+          <!-- GNSS Geometry & Coordinates (Right) -->
+          <div class="col-span-12 lg:col-span-5 bg-[#111B2B] p-4 rounded-lg card-border flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-bold text-gray-300">GNSS TELEMETRY & FIX</span>
+                <span class="text-[9px] mono text-[#22C98B] font-bold">3D FIX (10 SATELLITES)</span>
+              </div>
+              <div class="space-y-2 text-xs mono">
+                <div class="bg-[#080D18] p-2.5 rounded border border-[#223550]">
+                  <div class="text-[8px] text-gray-500">LATITUDE</div>
+                  <div class="text-sm font-bold text-[#00D1FF]">${telemetry.lat.toFixed(6)}° N</div>
+                </div>
+                <div class="bg-[#080D18] p-2.5 rounded border border-[#223550]">
+                  <div class="text-[8px] text-gray-500">LONGITUDE</div>
+                  <div class="text-sm font-bold text-[#00D1FF]">${telemetry.lon.toFixed(6)}° E</div>
+                </div>
+                <div class="bg-[#080D18] p-2.5 rounded border border-[#223550]">
+                  <div class="text-[8px] text-gray-500">ALTITUDE MSL</div>
+                  <div class="text-sm font-bold text-[#22C98B]">${(telemetry.alt + 18.4).toFixed(1)} m MSL</div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="bg-[#080D18] p-2 rounded border border-[#223550]">
+                    <div class="text-[8px] text-gray-500">HDOP ACCURACY</div>
+                    <div class="font-bold text-gray-200">0.88 (Nominal)</div>
+                  </div>
+                  <div class="bg-[#080D18] p-2 rounded border border-[#223550]">
+                    <div class="text-[8px] text-gray-500">GROUND DISTANCE</div>
+                    <div class="font-bold text-[#00D1FF]">48.2 m</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-[#080D18] p-3 rounded border border-[#223550] text-[10px] mono text-gray-400">
+              <div class="text-[#22C98B] font-bold mb-1">RECOVERY TEAM GUIDANCE</div>
+              <div>Bearing: 042° NE from base camp</div>
+              <div>Estimated ground arrival: ~35 seconds post-touchdown</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      drawRadar();
+    }
+
+    function drawRadar() {
+      const cvs = document.getElementById('radar-canvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = 320;
+      const h = 320;
+      const cx = w / 2;
+      const cy = h / 2;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Sweep Beam
+      radarAngle = (radarAngle + 0.05) % (Math.PI * 2);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, 150, radarAngle - 0.2, radarAngle);
+      ctx.closePath();
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 150);
+      grad.addColorStop(0, 'rgba(0, 209, 255, 0.4)');
+      grad.addColorStop(1, 'rgba(0, 209, 255, 0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Probe Target Blip
+      const distRatio = Math.min(1, telemetry.alt / 500);
+      const px = cx + (Math.cos(radarAngle - 0.5) * (distRatio * 130 + 10));
+      const py = cy + (Math.sin(radarAngle - 0.5) * (distRatio * 130 + 10));
+
+      ctx.beginPath();
+      ctx.arc(px, py, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#00D1FF';
+      ctx.fill();
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = '#00D1FF';
+      ctx.font = '9px monospace';
+      ctx.fillText('AETHER-01', px + 8, py - 4);
+    }
+
+    // 5. COMMUNICATION
+    function renderComm(container) {
+      container.innerHTML = `
+        <div class="grid grid-cols-12 gap-3">
+          <div class="col-span-12 lg:col-span-6 bg-[#111B2B] p-4 rounded-lg card-border space-y-3">
+            <h3 class="text-xs font-bold text-gray-300">LORA TRANSCEIVER PARAMETERS (SX1278)</h3>
+            <div class="grid grid-cols-2 gap-2 text-xs mono">
+              <div class="bg-[#080D18] p-2.5 rounded border border-[#223550]">
+                <div class="text-[8px] text-gray-400">FREQUENCY</div>
+                <div class="text-base font-bold text-[#00D1FF]">433.000 MHz</div>
+              </div>
+              <div class="bg-[#080D18] p-2.5 rounded border border-[#223550]">
+                <div class="text-[8px] text-gray-400">SPREADING FACTOR</div>
+                <div class="text-base font-bold text-gray-200">SF7</div>
+              </div>
+              <div class="bg-[#080D18] p-2.5 rounded border border-[#223550]">
+                <div class="text-[8px] text-gray-400">BANDWIDTH</div>
+                <div class="text-base font-bold text-gray-200">125 kHz</div>
+              </div>
+              <div class="bg-[#080D18] p-2.5 rounded border border-[#223550]">
+                <div class="text-[8px] text-gray-400">CODING RATE</div>
+                <div class="text-base font-bold text-gray-200">4/5</div>
+              </div>
+            </div>
+
+            <div class="bg-[#080D18] p-3 rounded border border-[#223550] space-y-1.5 text-xs mono">
+              <div class="flex justify-between">
+                <span class="text-gray-400">RSSI Power:</span>
+                <span class="text-[#00D1FF] font-bold">${telemetry.rssi} dBm</span>
+              </div>
+              <div class="w-full bg-[#111B2B] h-1.5 rounded overflow-hidden">
+                <div style="width: ${Math.max(10, (120 + telemetry.rssi) * 1.2)}%;" class="bg-[#00D1FF] h-full"></div>
+              </div>
+              <div class="flex justify-between pt-1">
+                <span class="text-gray-400">Signal-to-Noise Ratio (SNR):</span>
+                <span class="text-[#22C98B] font-bold">+${telemetry.snr} dB</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-12 lg:col-span-6 bg-[#111B2B] p-4 rounded-lg card-border flex flex-col justify-between">
+            <div>
+              <h3 class="text-xs font-bold text-gray-300 mb-2">RAW TELEMETRY TELEGRAM (HEX / JSON DECODE)</h3>
+              <div class="bg-[#080D18] p-3 rounded border border-[#223550] mono text-[10px] text-green-400 overflow-x-auto">
+                <div>// LATEST LO-RA PACKET HEADER</div>
+                <div>0xAA 0x55 0x01 [PKT_ID: 0x${packetId.toString(16).padStart(4, '0')}] [PHASE: 0x03]</div>
+                <div class="mt-2">// TELEMETRY PAYLOAD (28 BYTES)</div>
+                <div>ALT: ${telemetry.alt.toFixed(2)} | VEL: ${telemetry.vel.toFixed(2)} | TEMP: ${telemetry.temp.toFixed(2)}</div>
+                <div>PRESS: ${telemetry.pressure.toFixed(2)} | AQI: ${telemetry.aqi} | BATT: ${telemetry.batt.toFixed(2)}V</div>
+                <div>GPS_LAT: ${telemetry.lat.toFixed(6)} | GPS_LON: ${telemetry.lon.toFixed(6)}</div>
+                <div class="text-gray-500 mt-2">// CRC16 CHECKSUM: 0x7E3A [VALID]</div>
+              </div>
+            </div>
+
+            <div class="bg-[#080D18] p-2.5 rounded border border-[#223550] text-[10px] mono text-gray-400 flex justify-between mt-3">
+              <span>Ground Station Antenna: 5 dBi Omni Dipole</span>
+              <span class="text-[#22C98B]">Link Budget Margin: +18.4 dB</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 6. MISSION LOGS & CSV EXPORT
+    function renderLogs(container) {
+      container.innerHTML = `
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center space-x-3">
+            <h2 class="text-sm font-bold text-gray-200">HISTORICAL FLIGHT TELEMETRY LOGS</h2>
+            <span class="text-[10px] mono text-gray-400">Total Packets: ${history.length}</span>
+          </div>
+          <button onclick="exportCSV()" class="px-3 py-1.5 rounded bg-[#22C98B] hover:bg-[#22C98B]/90 text-[#080D18] text-xs font-bold transition flex items-center space-x-1.5 shadow-[0_0_10px_rgba(34,201,139,0.3)]">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span>EXPORT CSV</span>
+          </button>
+        </div>
+
+        <div class="bg-[#111B2B] rounded-lg card-border overflow-hidden">
+          <div class="overflow-x-auto max-h-[500px] custom-scroll">
+            <table class="w-full text-left text-xs mono">
+              <thead class="bg-[#080D18] text-gray-400 text-[10px] sticky top-0 border-b border-[#223550]">
+                <tr>
+                  <th class="p-2.5">PKT#</th>
+                  <th class="p-2.5">TIME</th>
+                  <th class="p-2.5">PHASE</th>
+                  <th class="p-2.5">ALT (m)</th>
+                  <th class="p-2.5">VEL (m/s)</th>
+                  <th class="p-2.5">TEMP (°C)</th>
+                  <th class="p-2.5">PRESS (hPa)</th>
+                  <th class="p-2.5">HUM (%)</th>
+                  <th class="p-2.5">AQI</th>
+                  <th class="p-2.5">BATT (V)</th>
+                  <th class="p-2.5">RSSI</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#223550] text-gray-300">
+                ${history.slice().reverse().map(p => `
+                  <tr class="hover:bg-[#16243A] transition">
+                    <td class="p-2 text-[#00D1FF]">#${p.packetId}</td>
+                    <td class="p-2">${p.time}</td>
+                    <td class="p-2"><span class="px-1.5 py-0.5 rounded text-[8px] bg-[#00D1FF]/10 text-[#00D1FF] font-bold">${p.phase}</span></td>
+                    <td class="p-2 text-white font-bold">${p.alt.toFixed(1)}</td>
+                    <td class="p-2">${p.vel.toFixed(1)}</td>
+                    <td class="p-2">${p.temp.toFixed(1)}</td>
+                    <td class="p-2">${p.pressure.toFixed(1)}</td>
+                    <td class="p-2">${p.humidity.toFixed(1)}</td>
+                    <td class="p-2 text-[#FFC837]">${p.aqi}</td>
+                    <td class="p-2 text-[#22C98B]">${p.batt.toFixed(2)}</td>
+                    <td class="p-2">${p.rssi}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function exportCSV() {
+      let csv = 'packet_id,timestamp_met,phase,altitude_m,velocity_ms,temperature_c,pressure_hpa,humidity_pct,aqi,battery_v,rssi_dbm\n';
+      history.forEach(p => {
+        csv += `${p.packetId},"${p.time}","${p.phase}",${p.alt.toFixed(2)},${p.vel.toFixed(2)},${p.temp.toFixed(2)},${p.pressure.toFixed(2)},${p.humidity.toFixed(2)},${p.aqi},${p.batt.toFixed(2)},${p.rssi}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `AetherView_Advaita_Telemetry_${Date.now()}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 7. SYSTEM SETTINGS
+    function renderSettings(container) {
+      container.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="bg-[#111B2B] p-4 rounded-lg card-border space-y-3">
+            <h3 class="text-xs font-bold text-gray-300">HARDWARE ADAPTER & UPLINK SETTINGS</h3>
+            <div class="space-y-2 text-xs">
+              <div>
+                <label class="text-[10px] mono text-gray-400 block mb-1">OPERATING MODE</label>
+                <select class="w-full bg-[#080D18] p-2 rounded border border-[#223550] text-gray-200 mono">
+                  <option selected>SIMULATION (Physics Engine)</option>
+                  <option>LIVE HARDWARE (USB Serial Gateway)</option>
+                  <option>LIVE HARDWARE (WebSocket Bridge)</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[10px] mono text-gray-400 block mb-1">SERIAL COM PORT / WEBSOCKET URL</label>
+                <input type="text" value="ws://localhost:8080/telemetry" class="w-full bg-[#080D18] p-2 rounded border border-[#223550] text-[#00D1FF] mono">
+              </div>
+              <div>
+                <label class="text-[10px] mono text-gray-400 block mb-1">BAUD RATE</label>
+                <select class="w-full bg-[#080D18] p-2 rounded border border-[#223550] text-gray-200 mono">
+                  <option selected>115200 bps (Standard ESP32)</option>
+                  <option>57600 bps</option>
+                  <option>9600 bps</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-[#111B2B] p-4 rounded-lg card-border space-y-3">
+            <h3 class="text-xs font-bold text-gray-300">MISSION CONFIGURATION</h3>
+            <div class="space-y-2 text-xs">
+              <div>
+                <label class="text-[10px] mono text-gray-400 block mb-1">TARGET DEPLOYMENT APOGEE (METRES)</label>
+                <input type="number" value="500.0" class="w-full bg-[#080D18] p-2 rounded border border-[#223550] text-[#00D1FF] mono">
+              </div>
+              <div>
+                <label class="text-[10px] mono text-gray-400 block mb-1">GROUND STATION BASE COORDINATES</label>
+                <input type="text" value="13.0827° N, 80.2707° E, 15.0m MSL" class="w-full bg-[#080D18] p-2 rounded border border-[#223550] text-gray-200 mono">
+              </div>
+              <div class="pt-2">
+                <button onclick="alert('Settings saved to Ground Station configuration buffer.');" class="w-full py-2 bg-[#00D1FF] text-black font-bold rounded text-xs">
+                  SAVE CONFIGURATION
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>

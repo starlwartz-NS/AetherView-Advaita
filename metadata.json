@@ -1,0 +1,6 @@
+{
+  "name": "AetherView Advaita",
+  "description": "Autonomous CanSat Ground Station & Flight Telemetry System for DTU RYIC 2026 CanSat Challenge",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
